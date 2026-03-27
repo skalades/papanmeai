@@ -1,0 +1,5 @@
+{
+  "name": "PAPA N ME Smart Mirror Barber",
+  "description": "Cermin pintar bertenaga AI untuk barbershop yang menyediakan analisis wajah dan rekomendasi gaya rambut yang dipersonalisasi.",
+  "requestFramePermissions": ["camera"]
+}
