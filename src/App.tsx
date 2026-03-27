@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, ChangeEvent } from "react";
+import React, { useState, useRef, useEffect, ChangeEvent } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   Camera, 
@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   Sparkles,
   Monitor,
-  Upload,
   Image as ImageIcon,
   Ruler,
   Waves,
@@ -59,6 +58,7 @@ export default function App() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [generatingStyles, setGeneratingStyles] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<string | null>(null);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string>("");
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,18 +66,7 @@ export default function App() {
   const streamRef = useRef<MediaStream | null>(null);
   const isStartingCamera = useRef(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileUpload = (e: ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserData(prev => ({ ...prev, profilePicture: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const startCamera = async (deviceId?: string) => {
     if (isStartingCamera.current) return;
@@ -271,10 +260,10 @@ export default function App() {
             
             <div className="space-y-8">
               <div className="flex flex-col items-center gap-6">
-                <div className="relative w-40 h-40 group">
+                <div className="relative w-40 h-40">
                   <div className="absolute inset-0 border border-gold-500/20 rounded-full animate-[spin_20s_linear_infinite]" />
                   <div className="absolute inset-2 border border-gold-500/10 rounded-full animate-[spin_15s_linear_infinite_reverse]" />
-                  <div className="absolute inset-4 overflow-hidden rounded-full glass-gold flex items-center justify-center group-hover:border-gold-500/40 transition-colors duration-500">
+                  <div className="absolute inset-4 overflow-hidden rounded-full glass-gold flex items-center justify-center">
                     {userData.profilePicture ? (
                       <img src={userData.profilePicture} alt="Profil" className="w-full h-full object-cover" />
                     ) : (
@@ -282,22 +271,8 @@ export default function App() {
                         <User className="w-8 h-8 text-gold-500/30" />
                       </div>
                     )}
-                    <button 
-                      onClick={() => fileInputRef.current?.click()}
-                      className="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all duration-500 flex flex-col items-center justify-center gap-2 text-[9px] font-sans uppercase tracking-[0.2em] text-gold-200"
-                    >
-                      <Upload className="w-5 h-5 text-gold-500" /> 
-                      <span>Unggah Foto</span>
-                    </button>
                   </div>
                 </div>
-                <input 
-                  type="file" 
-                  ref={fileInputRef}
-                  onChange={handleFileUpload}
-                  accept="image/*"
-                  className="hidden"
-                />
               </div>
 
               <div className="space-y-6">
@@ -327,7 +302,7 @@ export default function App() {
             <button 
               disabled={!userData.name || !userData.phone}
               onClick={() => setStep("HAIR_DETAILS")}
-              className="w-full relative group overflow-hidden py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 disabled:opacity-30 disabled:cursor-not-allowed"
+              className="w-full relative group overflow-hidden py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 disabled:opacity-30 disabled:cursor-not-allowed hover-glow"
             >
               <div className="relative z-10 flex items-center justify-center gap-4 text-gold-200 font-serif text-lg tracking-widest uppercase italic">
                 Langkah Berikutnya <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -503,7 +478,7 @@ export default function App() {
                   </div>
                   <button 
                     onClick={() => setError(null)}
-                    className="mt-4 glass-gold px-10 py-3 text-gold-200 font-serif italic text-sm tracking-widest hover:bg-gold-500/10 transition-all"
+                    className="mt-4 glass-gold px-10 py-3 text-gold-200 font-serif italic text-sm tracking-widest hover:bg-gold-500/10 transition-all hover-glow"
                   >
                     Coba Lagi
                   </button>
@@ -517,14 +492,14 @@ export default function App() {
               <button 
                 disabled={isAnalyzing}
                 onClick={() => setStep("HAIR_DETAILS")}
-                className="flex-1 py-5 glass hover:bg-white/10 transition-all duration-500 text-zinc-400 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 disabled:opacity-30"
+                className="flex-1 py-5 glass hover:bg-white/10 transition-all duration-500 text-zinc-400 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 disabled:opacity-30 hover-glow"
               >
                 <ArrowLeft className="w-5 h-5" /> Kembali
               </button>
               <button 
                 disabled={isAnalyzing}
                 onClick={captureImage}
-                className="flex-[2] py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 text-gold-200 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 disabled:opacity-30"
+                className="flex-[2] py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 text-gold-200 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 disabled:opacity-30 hover-glow"
               >
                 <Camera className="w-5 h-5" /> Ambil & Analisis
               </button>
@@ -595,7 +570,7 @@ export default function App() {
                   <button 
                     key={idx}
                     onClick={() => handleStyleSelection(rec.style)}
-                    className={`group relative text-left transition-all duration-700 overflow-hidden border ${userData.selectedStyle === rec.style ? 'bg-gold-500/10 border-gold-500 shadow-[0_0_30px_rgba(245,158,11,0.1)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
+                    className={`group relative text-left transition-all duration-700 overflow-hidden border hover-glow ${userData.selectedStyle === rec.style ? 'bg-gold-500/10 border-gold-500 shadow-[0_0_30px_rgba(245,158,11,0.1)]' : 'bg-white/5 border-white/5 hover:border-white/20'}`}
                   >
                     <div className="aspect-[4/3] w-full bg-zinc-900 relative overflow-hidden">
                       {generatingStyles[rec.style] ? (
@@ -639,14 +614,14 @@ export default function App() {
             <div className="flex gap-6 pt-8">
               <button 
                 onClick={() => setStep("FACE_ANALYSIS")}
-                className="flex-1 py-5 glass hover:bg-white/10 transition-all duration-500 text-zinc-400 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4"
+                className="flex-1 py-5 glass hover:bg-white/10 transition-all duration-500 text-zinc-400 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 hover-glow"
               >
                 <RefreshCcw className="w-5 h-5" /> Pindai Ulang
               </button>
               <button 
                 disabled={!userData.selectedStyle}
                 onClick={() => setStep("BARBER_VIEW")}
-                className="flex-[2] py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 text-gold-200 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 disabled:opacity-30"
+                className="flex-[2] py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 text-gold-200 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 disabled:opacity-30 hover-glow"
               >
                 Konfirmasi Pilihan <ChevronRight className="w-5 h-5" />
               </button>
@@ -758,13 +733,13 @@ export default function App() {
             <div className="flex flex-col md:flex-row gap-6 pt-12">
               <button 
                 onClick={() => setStep("RECOMMENDATIONS")}
-                className="flex-1 py-5 glass hover:bg-white/10 transition-all duration-500 text-zinc-400 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4"
+                className="flex-1 py-5 glass hover:bg-white/10 transition-all duration-500 text-zinc-400 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 hover-glow"
               >
                 <ArrowLeft className="w-5 h-5" /> Kembali ke Gaya
               </button>
               <button 
                 onClick={() => window.location.reload()}
-                className="flex-1 py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 text-gold-200 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4"
+                className="flex-1 py-5 glass-gold hover:bg-gold-500/10 transition-all duration-500 text-gold-200 font-serif text-lg tracking-widest uppercase italic flex items-center justify-center gap-4 hover-glow"
               >
                 <CheckCircle2 className="w-5 h-5" /> Selesaikan Sesi
               </button>
@@ -774,24 +749,42 @@ export default function App() {
     }
   };
 
+  const handleMouseMove = (e: React.MouseEvent) => {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    const x = (clientX / innerWidth - 0.5) * 20;
+    const y = (clientY / innerHeight - 0.5) * 20;
+    setMousePosition({ x, y });
+  };
+
   return (
-    <div className="min-h-screen bg-[#050505] text-zinc-100 font-sans selection:bg-gold-500 selection:text-black overflow-x-hidden">
+    <div 
+      onMouseMove={handleMouseMove}
+      className="min-h-screen bg-[#050505] text-zinc-100 font-sans selection:bg-gold-500 selection:text-black overflow-x-hidden"
+    >
       {/* Atmospheric Background */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-gold-900/10 blur-[120px] rounded-full" />
-        <div className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-gold-600/5 blur-[100px] rounded-full" />
+        <motion.div 
+          animate={{ x: mousePosition.x * -1.5, y: mousePosition.y * -1.5 }}
+          transition={{ type: "spring", damping: 30, stiffness: 50 }}
+          className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-gold-900/10 blur-[120px] rounded-full" 
+        />
+        <motion.div 
+          animate={{ x: mousePosition.x * 1.5, y: mousePosition.y * 1.5 }}
+          transition={{ type: "spring", damping: 30, stiffness: 50 }}
+          className="absolute -bottom-[20%] -right-[10%] w-[50%] h-[50%] bg-gold-600/5 blur-[100px] rounded-full" 
+        />
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-[0.03] mix-blend-overlay" />
       </div>
 
       {/* Header Branding */}
       <header className="relative z-50 p-8 flex items-center justify-between max-w-7xl mx-auto w-full">
-        <div className="flex items-center gap-4 group cursor-pointer">
-          <div className="relative w-12 h-12 flex items-center justify-center">
-            <div className="absolute inset-0 border border-gold-500/30 rotate-45 group-hover:rotate-90 transition-transform duration-700" />
-            <Scissors className="text-gold-500 w-6 h-6 relative z-10" />
+        <div className="flex items-center gap-4 group cursor-pointer transition-transform duration-500 hover:scale-105">
+          <div className="relative animate-shimmer">
+            <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
           </div>
           <div>
-            <h1 className="text-3xl font-serif font-light tracking-[0.2em] uppercase text-gradient-gold leading-none">
+            <h1 className="text-3xl font-serif font-light tracking-[0.2em] uppercase text-gradient-gold leading-none animate-shimmer">
               PAPA N ME
             </h1>
             <p className="text-[9px] font-sans text-gold-500/50 uppercase tracking-[0.4em] mt-1">Precision Grooming Studio</p>
